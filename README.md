@@ -14,7 +14,7 @@ se vuelve a abrir si se cae.
    del paso 1, ancho 80 mm, modo ESC/POS, y márcala para **cuentas y facturas** (y como predeterminada si es la única).
 3. **El código.** En la misma pantalla pulsa **Conectar un equipo**: da un código de 8 caracteres que vale 15 minutos.
 4. **El instalador.** En el computador del local ejecuta `DAX-Impresion-Instalar-<versión>.exe` (pide permiso de administrador).
-   Escribe la dirección del POS (ya viene `https://www.theburgery.shop`) y el código. Al terminar, en el POS la impresora aparece **En línea**.
+   Escribe la dirección del POS (ya viene `https://pos.theburgery.shop`) y el código. Al terminar, en el POS la impresora aparece **En línea**.
 5. **Prueba.** En el POS pulsa **Imprimir prueba** en la impresora.
 
 > Mientras el instalador no esté firmado, Windows puede mostrar «Windows protegió su PC». Pulsa **Más información → Ejecutar de todas formas**.

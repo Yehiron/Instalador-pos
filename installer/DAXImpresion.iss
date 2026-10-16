@@ -69,7 +69,7 @@ begin
     '');
   ConnectPage.Add('Dirección del POS:', False);
   ConnectPage.Add('Código de 8 caracteres:', False);
-  ConnectPage.Values[0] := 'https://www.theburgery.shop';
+  ConnectPage.Values[0] := 'https://pos.theburgery.shop';
 end;
 
 function ShouldSkipPage(PageID: Integer): Boolean;
@@ -84,7 +84,7 @@ begin
   begin
     if Pos('http', Lowercase(Trim(ConnectPage.Values[0]))) <> 1 then
     begin
-      MsgBox('Escribe la dirección completa del POS, por ejemplo https://www.theburgery.shop', mbError, MB_OK);
+      MsgBox('Escribe la dirección completa del POS, por ejemplo https://pos.theburgery.shop', mbError, MB_OK);
       Result := False;
     end
     else if Length(Trim(ConnectPage.Values[1])) <> 8 then
