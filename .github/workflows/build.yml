@@ -1,0 +1,62 @@
+name: Construir instalador
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install pytest==8.3.3
+      - run: python -m pytest -q
+
+  instalador-windows:
+    needs: pruebas
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install pyinstaller==6.10.0 pytest==8.3.3
+      - run: python -m pytest -q
+      - name: Versión del agente
+        shell: pwsh
+        run: |
+          $v = (Select-String -Path dax_print_agent.py -Pattern '^VERSION = "(.+)"').Matches[0].Groups[1].Value
+          "VERSION=$v" >> $env:GITHUB_ENV
+      - name: Empaquetar el agente (.exe)
+        run: pyinstaller --onefile --console --name DAXPrintAgent dax_print_agent.py
+      - name: Prueba rápida del .exe
+        shell: pwsh
+        run: |
+          .\dist\DAXPrintAgent.exe --home "$env:RUNNER_TEMP\dax" --status
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          .\dist\DAXPrintAgent.exe --home "$env:RUNNER_TEMP\dax" --install-system --dry-run | Select-String -Pattern "AtStartup","SYSTEM" | Out-Host
+      - name: Construir el instalador (Inno Setup)
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { choco install innosetup --no-progress -y; $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" }
+          & $iscc "/DAppVersion=$env:VERSION" installer\DAXImpresion.iss
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DAX-Impresion-Instalar-${{ env.VERSION }}
+          path: installer/Output/*.exe
+      - name: Publicar la versión (etiquetas v*)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: installer/Output/*.exe
